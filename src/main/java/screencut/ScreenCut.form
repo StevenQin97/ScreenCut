@@ -30,7 +30,7 @@
             <properties>
               <background color="-986896"/>
               <horizontalTextPosition value="0"/>
-              <icon value="rect.png"/>
+              <icon value="icon/rect.png"/>
               <text value=""/>
             </properties>
           </component>
@@ -38,14 +38,14 @@
             <constraints/>
             <properties>
               <horizontalAlignment value="0"/>
-              <icon value="circle.png"/>
+              <icon value="icon/circle.png"/>
               <text value=""/>
             </properties>
           </component>
           <component id="49021" class="javax.swing.JButton" binding="jButton5">
             <constraints/>
             <properties>
-              <icon value="undo.png"/>
+              <icon value="icon/undo.png"/>
               <text value=""/>
             </properties>
           </component>
@@ -56,14 +56,14 @@
           <component id="a7884" class="javax.swing.JButton" binding="jButton7">
             <constraints/>
             <properties>
-              <icon value="exit.png"/>
+              <icon value="icon/exit.png"/>
               <text value=""/>
             </properties>
           </component>
           <component id="13d15" class="javax.swing.JButton" binding="jButton8">
             <constraints/>
             <properties>
-              <icon value="ok.png"/>
+              <icon value="icon/ok.png"/>
               <text value=""/>
             </properties>
           </component>

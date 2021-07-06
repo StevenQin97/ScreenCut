@@ -169,7 +169,7 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
             screen = new Rectangle(tool.getScreenSize());
             setSize(screen.width, screen.height);
             bgimg = robot.createScreenCapture(screen);
-            cur = tool.createCustomCursor(tool.createImage(getClass().getResource("/cur.png")), new Point(0, 0), "cur");
+            cur = tool.createCustomCursor(tool.createImage(getClass().getResource("/icon/cur.png")), new Point(0, 0), "cur");
             setCursor(cur);
             ButtonGroup bg = new ButtonGroup();
             initActionListener(panel.getComponents());
@@ -180,29 +180,8 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
     }
 
     private void initComponents() {
+        
         java.awt.GridBagConstraints gridBagConstraints;
-
-        panel = new javax.swing.JPanel();
-        displaySelected = new javax.swing.JButton();
-        toolbar = new javax.swing.JToolBar();
-        rectbtn = new javax.swing.JToggleButton();
-        circlebtn = new javax.swing.JToggleButton();
-        jSeparator1 = new javax.swing.JToolBar.Separator();
-        jButton5 = new javax.swing.JButton();
-        jButton7 = new javax.swing.JButton();
-        jButton8 = new javax.swing.JButton();
-
-        //颜色
-        jButton9 = new javax.swing.JButton();
-        jButton10 = new javax.swing.JButton();
-        jButton11 = new javax.swing.JButton();
-        jButton12 = new javax.swing.JButton();
-        jButton13 = new javax.swing.JButton();
-        jButton14 = new javax.swing.JButton();
-        jButton15 = new javax.swing.JButton();
-        jButton16 = new javax.swing.JButton();
-
-
         setAlwaysOnTop(true);
         setUndecorated(true);
         setResizable(false);
@@ -316,14 +295,14 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
         toolbar.setFloatable(false);
         toolbar.setDoubleBuffered(true);
 
-        rectbtn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rect.png"))); // NOI18N
+        rectbtn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/rect.png"))); // NOI18N
         rectbtn.setToolTipText("添加矩形");
         rectbtn.setFocusable(false);
         rectbtn.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         rectbtn.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         toolbar.add(rectbtn);
 
-        circlebtn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/circle.png"))); // NOI18N
+        circlebtn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/circle.png"))); // NOI18N
         circlebtn.setToolTipText("添加圆形");
         circlebtn.setFocusable(false);
         circlebtn.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -333,7 +312,7 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
         jSeparator1.setPreferredSize(new java.awt.Dimension(1, 0));
         toolbar.add(jSeparator1);
 
-        jButton5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/undo.png"))); // NOI18N
+        jButton5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/undo.png"))); // NOI18N
         jButton5.setToolTipText("撤销编辑");
         jButton5.setActionCommand("undo");
         jButton5.setFocusable(false);
@@ -341,7 +320,7 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
         jButton5.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         toolbar.add(jButton5);
 
-        jButton7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/exit.png"))); // NOI18N
+        jButton7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/exit.png"))); // NOI18N
         jButton7.setToolTipText("退出截图");
         jButton7.setActionCommand("exit");
         jButton7.setFocusable(false);
@@ -349,7 +328,7 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
         jButton7.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         toolbar.add(jButton7);
 
-        jButton8.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ok.png"))); // NOI18N
+        jButton8.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/ok.png"))); // NOI18N
         jButton8.setToolTipText("完成截图");
         //save 为保存 ok为放置到剪贴板
         jButton8.setActionCommand("save");
