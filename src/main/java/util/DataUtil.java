@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import java.io.*;
 
 public class DataUtil {
+
     public static String getData(){
         String jsonStr = readJsonFile("/data.json");
         if(jsonStr != null){
@@ -13,10 +14,39 @@ public class DataUtil {
         }
         return null;
     }
-    public static String setData(){
+
+    public static String setData(String data){
+        BufferedWriter writer = null;
+        File file = new File("/data.json");
+        //如果文件不存在，则新建一个
+        if(!file.exists()){
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        //写入
+        try {
+            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file,false), "UTF-8"));
+            writer.write(data);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                if(writer != null){
+                    writer.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         return null;
     }
+
     public boolean cleanData(){
+        String data = "{}";
+        setData(data);
         return true;
     }
 
@@ -40,5 +70,4 @@ public class DataUtil {
             return null;
         }
     }
-
 }

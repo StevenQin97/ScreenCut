@@ -16,22 +16,23 @@ public class HomePage extends JDialog{
     private JPanel imgPanel;
     private JPanel panel;
     private JLabel imgLabel;
+    private JButton 新增截图Button;
+    private JButton 删除截图Button;
     private String IMG_PATH = "E:\\1.jpg";
     private static HomePage homePage;
 
-    public static HomePage getInstance() {
+    public static void initHomePage() {
         if(homePage == null){
             homePage = new HomePage();
         }
         initComponents(homePage);
-        return homePage;
     }
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("HomePage");
         frame.setSize(1024,800);
         frame.setResizable(false);
-        getInstance();
+        initHomePage();
         frame.setContentPane(homePage.panel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
@@ -42,10 +43,8 @@ public class HomePage extends JDialog{
         ImageIcon icon = new ImageIcon("E:\\1.jpg");
         icon.setImage(icon.getImage().getScaledInstance(650, 500, Image.SCALE_DEFAULT));
         homePage.imgLabel.setIcon(icon);
-        homePage.functionTree.setEditable(true);
         homePage.getTree();
     }
-
 
     public void getTree(){
 

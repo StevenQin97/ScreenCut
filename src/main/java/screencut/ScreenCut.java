@@ -124,19 +124,12 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
     private Robot robot;
 
     public static void main(String[] args) {
-        ShowScreenCut(true);
+        ShowScreenCut();
     }
 
-    /**
-     * 调用此截图工具的应用程序未使用第三方皮肤时 nolnf=true 否则传false
-     *
-     * @param nolnf
-     */
-    public static void ShowScreenCut(boolean nolnf) {
+    public static void ShowScreenCut() {
         try {
-            if (nolnf) {
-                UIManager.setLookAndFeel(new NimbusLookAndFeel());
-            }
+            UIManager.setLookAndFeel(new NimbusLookAndFeel());
         } catch (Exception ex) {
             Logger.getLogger(ScreenCut.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -180,7 +173,7 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
     }
 
     private void initComponents() {
-        
+
         java.awt.GridBagConstraints gridBagConstraints;
         setAlwaysOnTop(true);
         setUndecorated(true);
