@@ -1,5 +1,7 @@
 package home;
-import sun.misc.Resource;
+
+import common.Constant;
+import screencut.ScreenCut;
 
 import javax.swing.*;
 import javax.swing.event.CellEditorListener;
@@ -9,17 +11,13 @@ import javax.swing.event.TreeModelListener;
 import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.net.URL;
 
 public class HomePage extends JDialog implements ActionListener, TreeModelListener {
     private JPanel treePanel;
     private JPanel imgPanel;
     private JPanel panel;
-    private JLabel imgLabel;
-    private JButton btnDelPic;
-    private JButton btnNewPic;
-    private JPanel btnPanel;
     private JFrame frame;
+    private JLabel imgLabel;
     private JTree tree;
     private String nodeName = null;
     private String IMG_PATH = "E:\\1.jpg";
@@ -30,8 +28,8 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
         frame = new JFrame("功能截图管理工具");
         frame.setSize(1024,800);
         frame.setResizable(false);
-        initComponents();
         initTree();
+        initComponents();
         frame.requestFocus();
         frame.setContentPane(panel);
         frame.setLocationRelativeTo(null);
@@ -45,15 +43,38 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
     }
 
     public void initComponents(){
-        URL resource = this.getClass().getResource("/img/1.png");
-        String path = resource.getPath();
-        if(path == null){
-            path = "";
-        }
-        ImageIcon icon = new ImageIcon(path);
-        icon.setImage(icon.getImage().getScaledInstance(650, 500, Image.SCALE_DEFAULT));
-        imgLabel.setIcon(icon);
+        JButton btnDelPic = new JButton("删除截图");
+        JButton btnNewPic = new JButton("添加截图");
+        JPanel buttonPanel = new JPanel();
 
+        buttonPanel.add(btnDelPic);
+        btnDelPic.setActionCommand("delPic");
+        btnDelPic.addActionListener(this);
+
+        buttonPanel.add(btnNewPic);
+        btnNewPic.setActionCommand("newPic");
+        btnNewPic.addActionListener(this);
+
+        imgLabel = new JLabel();
+        showPic("");
+
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setViewportView(imgLabel);
+        scrollPane.setBackground(Color.white);
+
+        imgPanel.add(buttonPanel, BorderLayout.NORTH);
+        imgPanel.add(scrollPane, BorderLayout.CENTER);
+        imgPanel.add(new JLabel("  "), BorderLayout.SOUTH);
+
+    }
+
+    private void showPic(String funcName){
+        if(funcName !=null && "".equals(funcName)){
+            String path = Constant.IMG_PATH+"1"+Constant.IMG_TYPE;
+            ImageIcon icon = new ImageIcon(path);
+            icon.setImage(icon.getImage().getScaledInstance(690, 500, Image.SCALE_DEFAULT));
+            imgLabel.setIcon(icon);
+        }
     }
 
     public void getTree(){
@@ -84,6 +105,7 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
         treePanel.add(panel, BorderLayout.NORTH);
         treePanel.add(scrollPane, BorderLayout.CENTER);
         treePanel.add(label, BorderLayout.SOUTH);
+        treePanel.setPreferredSize(new Dimension(300,-1));
 
         JPopupMenu menu=new JPopupMenu();		//创建菜单
         JMenuItem menuItemNew=new JMenuItem("新增子节点");//创建菜单项(点击菜单项相当于点击一个按钮)
@@ -144,10 +166,11 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
                 if(e.getButton()==MouseEvent.BUTTON3){
                     //menuItem.doClick(); //编程方式点击菜单项
                     TreePath pathForLocation = tree.getPathForLocation(x, y);//获取右键点击所在树节点路径
-
-                    tree.setSelectionPath(pathForLocation);
-                    menu.show(tree, x, y);
-
+                    DefaultMutableTreeNode selectionNode = (DefaultMutableTreeNode) pathForLocation.getLastPathComponent();
+                    if(pathForLocation!=null){
+                        tree.setSelectionPath(pathForLocation);
+                        menu.show(tree, x, y);
+                    }
                 }
             }
         });
@@ -180,6 +203,18 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
             treeModel.reload();
             label.setText("清除所有节点成功");
         }
+        if (ae.getActionCommand().equals("newPic")) {
+            frame.setExtendedState(Frame.ICONIFIED);
+            ScreenCut.ShowScreenCut(this);
+        }
+
+    }
+
+
+    public void actionForPicChange(){
+        showPic("");
+        frame.setExtendedState(Frame.NORMAL);
+        frame.repaint();
     }
 
     @Override
@@ -187,7 +222,6 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
         TreePath treePath = e.getTreePath();
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) treePath.getLastPathComponent();
         try {
-            node.setUserObject();
             int[] index = e.getChildIndices();
             node = (DefaultMutableTreeNode) node.getChildAt(index[0]);
         } catch (NullPointerException exc) {

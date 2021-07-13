@@ -1,5 +1,8 @@
 package screencut;
 
+import common.Constant;
+import home.HomePage;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
@@ -122,12 +125,13 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
 
 
     private Robot robot;
+    private HomePage parentPage;
 
     public static void main(String[] args) {
-        ShowScreenCut();
+        ShowScreenCut(null);
     }
 
-    public static void ShowScreenCut() {
+    public static void ShowScreenCut(HomePage parent) {
         try {
             UIManager.setLookAndFeel(new NimbusLookAndFeel());
         } catch (Exception ex) {
@@ -138,7 +142,7 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                ScreenCut dialog = new ScreenCut(new JFrame(), true);
+                ScreenCut dialog = new ScreenCut(new JFrame(), parent);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
@@ -150,13 +154,16 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
         });
     }
 
-    public ScreenCut(java.awt.Frame parent, boolean modal) {
+    public ScreenCut(java.awt.Frame parent, HomePage parentPage) {
         parent.setResizable(false);
         initComponents();
         addMouseListener(this);
         addMouseMotionListener(this);
         toolbar.setVisible(false);
         panel.setVisible(false);
+        if(parentPage!= null){
+            this.parentPage = parentPage;
+        }
         try {
             robot = new Robot();
             screen = new Rectangle(tool.getScreenSize());
@@ -164,7 +171,6 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
             bgimg = robot.createScreenCapture(screen);
             cur = tool.createCustomCursor(tool.createImage(getClass().getResource("/icon/cur.png")), new Point(0, 0), "cur");
             setCursor(cur);
-            ButtonGroup bg = new ButtonGroup();
             initActionListener(panel.getComponents());
             initActionListener(toolbar.getComponents());
         } catch (AWTException ex) {
@@ -183,23 +189,25 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
         panel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 204)));
         panel.setPreferredSize(new java.awt.Dimension(320, 100));
         java.awt.GridBagLayout panelLayout = new java.awt.GridBagLayout();
-        panelLayout.columnWidths = new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        panelLayout.columnWidths = new int[] {0, 0, 0, 0, 0};
         panelLayout.rowHeights = new int[] {0};
         panel.setLayout(panelLayout);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 7;
+        gridBagConstraints.gridy = 1;
 
         jButton9.setBackground(new java.awt.Color(102, 102, 102));
         jButton9.setForeground(new java.awt.Color(102, 102, 102));
         jButton9.setActionCommand("color");
         jButton9.setPreferredSize(new java.awt.Dimension(20, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 7;
-        gridBagConstraints.gridy = 1;
         panel.add(jButton9, gridBagConstraints);
 
         jButton10.setBackground(new java.awt.Color(255, 255, 255));
         jButton10.setForeground(new java.awt.Color(255, 255, 255));
         jButton10.setActionCommand("color");
         jButton10.setPreferredSize(new java.awt.Dimension(20, 20));
+
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 6;
         gridBagConstraints.gridy = 1;
@@ -282,8 +290,7 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
 
 
         getContentPane().add(panel);
-        panel.setBounds(80, 170, 280, 50);
-
+        panel.setBounds(80, 170, 150, 50);
         toolbar.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 51, 255)));
         toolbar.setFloatable(false);
         toolbar.setDoubleBuffered(true);
@@ -331,7 +338,7 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
         toolbar.add(jButton8);
 
         getContentPane().add(toolbar);
-        toolbar.setBounds(81, 138, 280, 25);
+        toolbar.setBounds(81, 138, 150, 25);
 
         pack();
     }
@@ -356,23 +363,33 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
         } else {
             if ("exit".equals(cmd)) {
                 dispose();
+                if(parentPage!= null){
+                    parentPage.actionForPicChange();
+                }
             } else if ("save".equals(cmd)) {
-                file = new File("E://1.jpg");
-                if (file.exists()) {
-                    int opt = JOptionPane.showConfirmDialog(rootPane, "文件" + file.getName() + "已经存在,是否覆盖？");
+                File imgDir = new File(Constant.IMG_PATH);
+                if(!imgDir.exists()){
+                    imgDir.mkdirs();
+                }
+                ScreenCut.file = new File(Constant.IMG_PATH+"1.png");
+                if (ScreenCut.file.exists()) {
+                    int opt = JOptionPane.showConfirmDialog(rootPane, "文件" + ScreenCut.file.getName() + "已经存在,是否覆盖？");
                     if (opt == JOptionPane.OK_OPTION) {
-                        saveFile(file);
+                        saveFile(ScreenCut.file);
                     }
                 } else {
-                    saveFile(file);
+                    saveFile(ScreenCut.file);
                 }
                 requestFocus();
+                if(parentPage!= null){
+                    parentPage.actionForPicChange();
+                }
             } else if ("undo".equals(cmd)) {
                 if (!draws.isEmpty()) {
                     draws.remove(draws.size() - 1);
                 }
             } else {
-                boolean eq = temp == null ? false : temp.equals((JToggleButton) e.getSource());
+                boolean eq = temp != null && temp.equals(e.getSource());
                 clickCount = eq ? ++clickCount : 0;
                 temp = (JToggleButton) e.getSource();
                 initButton(temp);
