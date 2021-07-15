@@ -1,5 +1,6 @@
 package home;
 
+import com.google.gson.Gson;
 import common.Constant;
 import screencut.ScreenCut;
 
@@ -20,7 +21,6 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
     private JLabel imgLabel;
     private JTree tree;
     private String nodeName = null;
-    private String IMG_PATH = "E:\\1.jpg";
     JLabel label = null;
     DefaultTreeModel treeModel = null;
 
@@ -68,21 +68,21 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
 
     }
 
-    private void showPic(String funcName){
-        if(funcName !=null && "".equals(funcName)){
-            String path = Constant.IMG_PATH+"1"+Constant.IMG_TYPE;
+    private void showPic(String filepath){
+        if(filepath !=null && !"".equals(filepath)){
+            String path = Constant.IMG_PATH + filepath + Constant.IMG_TYPE;
             ImageIcon icon = new ImageIcon(path);
-            icon.setImage(icon.getImage().getScaledInstance(690, 500, Image.SCALE_DEFAULT));
+            icon.setImage(icon.getImage().getScaledInstance(685, 500, Image.SCALE_DEFAULT));
             imgLabel.setIcon(icon);
         }
     }
 
-    public void getTree(){
+    public void getTreeData(){
 
     }
 
     public void initTree(){
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode("JSON结构");
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("功能清单");
         tree = new JTree(root);
         tree.setEditable(true);
         tree.addMouseListener(new MouseHandle());
@@ -109,7 +109,7 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
 
         JPopupMenu menu=new JPopupMenu();		//创建菜单
         JMenuItem menuItemNew=new JMenuItem("新增子节点");//创建菜单项(点击菜单项相当于点击一个按钮)
-        JMenuItem menuItemDel=new JMenuItem("删除当前节点");//创建菜单项(点击菜单项相当于点击一个按钮)
+        JMenuItem menuItemDel=new JMenuItem("删除当前节点及子节点");//创建菜单项(点击菜单项相当于点击一个按钮)
         menu.add(menuItemNew);
         menu.add(menuItemDel);
         //菜单项绑定监听
@@ -166,10 +166,19 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
                 if(e.getButton()==MouseEvent.BUTTON3){
                     //menuItem.doClick(); //编程方式点击菜单项
                     TreePath pathForLocation = tree.getPathForLocation(x, y);//获取右键点击所在树节点路径
-                    DefaultMutableTreeNode selectionNode = (DefaultMutableTreeNode) pathForLocation.getLastPathComponent();
                     if(pathForLocation!=null){
                         tree.setSelectionPath(pathForLocation);
+                        getFilePath(pathForLocation);
                         menu.show(tree, x, y);
+                    }
+                }
+                if(e.getButton()==MouseEvent.BUTTON1){
+                    //menuItem.doClick(); //编程方式点击菜单项
+                    TreePath pathForLocation = tree.getPathForLocation(x, y);//获取右键点击所在树节点路径
+                    if(pathForLocation!=null){
+                        tree.setSelectionPath(pathForLocation);
+                        System.out.println();
+                        showPic(getFilePath(pathForLocation));
                     }
                 }
             }
@@ -205,14 +214,16 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
         }
         if (ae.getActionCommand().equals("newPic")) {
             frame.setExtendedState(Frame.ICONIFIED);
-            ScreenCut.ShowScreenCut(this);
+            TreePath treePath = tree.getSelectionPath();
+            String filePath = getFilePath(treePath);
+            ScreenCut.ShowScreenCut(this,filePath);
         }
 
     }
 
 
-    public void actionForPicChange(){
-        showPic("");
+    public void actionForPicChange(String filePath){
+        showPic(filePath);
         frame.setExtendedState(Frame.NORMAL);
         frame.repaint();
     }
@@ -276,4 +287,12 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
             editingStopped(e);
         }
     }
+
+    private String getFilePath(TreePath treePath){
+        String s = treePath.toString();
+        String substring = s.substring(1, s.length()-1);
+        String s1 = substring.replaceAll(", ", "/");
+        return s1;
+    }
+
 }

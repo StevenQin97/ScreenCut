@@ -80,6 +80,10 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
     private List<Object[]> draws = new ArrayList<Object[]>();
     private Cursor cur;
     private static File file;
+    /**
+     * 截图存储路径
+     */
+    private String filePath;
 
 
     /**
@@ -128,10 +132,10 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
     private HomePage parentPage;
 
     public static void main(String[] args) {
-        ShowScreenCut(null);
+        ShowScreenCut(null,"");
     }
 
-    public static void ShowScreenCut(HomePage parent) {
+    public static void ShowScreenCut(HomePage parent,String filePath) {
         try {
             UIManager.setLookAndFeel(new NimbusLookAndFeel());
         } catch (Exception ex) {
@@ -142,7 +146,7 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                ScreenCut dialog = new ScreenCut(new JFrame(), parent);
+                ScreenCut dialog = new ScreenCut(new JFrame(), parent, filePath);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
@@ -154,7 +158,7 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
         });
     }
 
-    public ScreenCut(java.awt.Frame parent, HomePage parentPage) {
+    public ScreenCut(java.awt.Frame parent, HomePage parentPage,String filePath) {
         parent.setResizable(false);
         initComponents();
         addMouseListener(this);
@@ -163,6 +167,7 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
         panel.setVisible(false);
         if(parentPage!= null){
             this.parentPage = parentPage;
+            this.filePath = filePath;
         }
         try {
             robot = new Robot();
@@ -364,14 +369,14 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
             if ("exit".equals(cmd)) {
                 dispose();
                 if(parentPage!= null){
-                    parentPage.actionForPicChange();
+                    parentPage.actionForPicChange(filePath);
                 }
             } else if ("save".equals(cmd)) {
-                File imgDir = new File(Constant.IMG_PATH);
+                File imgDir = new File(Constant.IMG_PATH + filePath.substring(0,filePath.lastIndexOf('/')));
                 if(!imgDir.exists()){
                     imgDir.mkdirs();
                 }
-                ScreenCut.file = new File(Constant.IMG_PATH+"1.png");
+                ScreenCut.file = new File(Constant.IMG_PATH+ filePath +Constant.IMG_TYPE);
                 if (ScreenCut.file.exists()) {
                     int opt = JOptionPane.showConfirmDialog(rootPane, "文件" + ScreenCut.file.getName() + "已经存在,是否覆盖？");
                     if (opt == JOptionPane.OK_OPTION) {
@@ -381,9 +386,6 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
                     saveFile(ScreenCut.file);
                 }
                 requestFocus();
-                if(parentPage!= null){
-                    parentPage.actionForPicChange();
-                }
             } else if ("undo".equals(cmd)) {
                 if (!draws.isEmpty()) {
                     draws.remove(draws.size() - 1);
@@ -414,6 +416,9 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
                 } catch (IOException ex) {
                     Logger.getLogger(ScreenCut.class.getName()).log(Level.SEVERE, null, ex);
                 } finally {
+                    if(parentPage!= null){
+                        parentPage.actionForPicChange(filePath);
+                    }
                     dispose();
                 }
             }
