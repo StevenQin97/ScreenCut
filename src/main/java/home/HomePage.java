@@ -164,7 +164,8 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
                 int y = e.getY();
 
                 if(e.getButton()==MouseEvent.BUTTON3){
-                    //menuItem.doClick(); //编程方式点击菜单项
+                    //menuItem.doClick(); //
+
                     TreePath pathForLocation = tree.getPathForLocation(x, y);//获取右键点击所在树节点路径
                     if(pathForLocation!=null){
                         tree.setSelectionPath(pathForLocation);
@@ -200,10 +201,10 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
 
     @Override
     public void actionPerformed(ActionEvent ae) {
-        if (ae.getActionCommand().equals("export")) {
+        if ("export".equals(ae.getActionCommand())) {
             label.setText("export");
         }
-        if (ae.getActionCommand().equals("clean")) {
+        if ("clean".equals(ae.getActionCommand())) {
             // 下面一行，由DefaultTreeModel的getRoot()方法取得根节点.
             DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode) treeModel.getRoot();
             // 下面一行删除所有子节点.
@@ -212,7 +213,7 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
             treeModel.reload();
             label.setText("清除所有节点成功");
         }
-        if (ae.getActionCommand().equals("newPic")) {
+        if ("newPic".equals(ae.getActionCommand())) {
             frame.setExtendedState(Frame.ICONIFIED);
             TreePath treePath = tree.getSelectionPath();
             String filePath = getFilePath(treePath);
@@ -273,8 +274,8 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
     class Tree_CellEditorAction implements CellEditorListener {
         @Override
         public void editingStopped(ChangeEvent e) {
-            Object selectnode = tree.getLastSelectedPathComponent();
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) selectnode;
+            Object selectNode = tree.getLastSelectedPathComponent();
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) selectNode;
             CellEditor cellEditor = (CellEditor) e.getSource();
             String newName = (String) cellEditor.getCellEditorValue();
             node.setUserObject(newName);

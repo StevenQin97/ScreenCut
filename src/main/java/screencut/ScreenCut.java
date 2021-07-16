@@ -372,7 +372,12 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
                     parentPage.actionForPicChange(filePath);
                 }
             } else if ("save".equals(cmd)) {
-                File imgDir = new File(Constant.IMG_PATH + filePath.substring(0,filePath.lastIndexOf('/')));
+                File imgDir ;
+                if(filePath.lastIndexOf('/') == -1){
+                    imgDir = new File(Constant.IMG_PATH);
+                }else{
+                    imgDir = new File(Constant.IMG_PATH + filePath.substring(0,filePath.lastIndexOf('/')));
+                }
                 if(!imgDir.exists()){
                     imgDir.mkdirs();
                 }
