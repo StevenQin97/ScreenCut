@@ -1,8 +1,9 @@
 package home;
 
-import com.google.gson.Gson;
+import com.alibaba.fastjson.JSONObject;
 import common.Constant;
 import screencut.ScreenCut;
+import util.DataUtil;
 
 import javax.swing.*;
 import javax.swing.event.CellEditorListener;
@@ -12,6 +13,7 @@ import javax.swing.event.TreeModelListener;
 import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 
 public class HomePage extends JDialog implements ActionListener, TreeModelListener {
     private JPanel treePanel;
@@ -38,7 +40,7 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
     }
 
     public static void main(String[] args) {
-        new HomePage();
+        new HomePage() ;
 
     }
 
@@ -78,12 +80,27 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
     }
 
     public void getTreeData(){
+        File dir = new File(Constant.BASE_PATH);
+        if(!dir.exists()){
+            dir.mkdirs();
+        }
+
+        File file = new File(Constant.BASE_PATH+"data.json");
+        if(!file.exists()){
+            DefaultMutableTreeNode root = new DefaultMutableTreeNode("功能清单");
+            tree = new JTree(root);
+            return;
+        }
+
+        JSONObject data = DataUtil.getData();
+        if(data!=null){
+
+        }
 
     }
 
     public void initTree(){
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode("功能清单");
-        tree = new JTree(root);
+        getTreeData();
         tree.setEditable(true);
         tree.addMouseListener(new MouseHandle());
         treeModel = (DefaultTreeModel) tree.getModel();
@@ -175,10 +192,9 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
                 }
                 if(e.getButton()==MouseEvent.BUTTON1){
                     //menuItem.doClick(); //编程方式点击菜单项
-                    TreePath pathForLocation = tree.getPathForLocation(x, y);//获取右键点击所在树节点路径
+                    TreePath pathForLocation = tree.getPathForLocation(x, y);
                     if(pathForLocation!=null){
                         tree.setSelectionPath(pathForLocation);
-                        System.out.println();
                         showPic(getFilePath(pathForLocation));
                     }
                 }
@@ -198,6 +214,36 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
         });
     }
 
+
+    private String parseTreeNode(TreeNode node) {
+        if (node == null) {
+            throw new RuntimeException("节点不能为空");
+        }
+        StringBuilder nodeBuilder = new StringBuilder("{");// JSON对象开始
+        // 把Map中的键值对构造成json对象属性
+        nodeBuilder.append("\"name\":\"" + node + "\",");
+
+        // 构造子节点
+        nodeBuilder.append("\"children\":["); // 子节点开始
+
+        int childCount = node.getChildCount();
+        for(int i = 0;i < childCount; i++){
+            TreeNode child = node.getChildAt(i);
+            if (child == null) {
+                continue;
+            }
+            nodeBuilder.append(parseTreeNode(child) + ",");// 递归调用ParseTreeNode返回一个完整的JSON字串:"{属性1:value,属性2:value}"
+        }
+        // 去掉末尾逗号
+        if (nodeBuilder.charAt(nodeBuilder.length() - 1) == ',') {
+            nodeBuilder.deleteCharAt(nodeBuilder.length() - 1);
+        }
+        nodeBuilder.append("]"); // 子节点结束
+
+        nodeBuilder.append("}"); // JSON对象结束
+
+        return nodeBuilder.toString();
+    }
 
     @Override
     public void actionPerformed(ActionEvent ae) {
@@ -239,22 +285,30 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
         } catch (NullPointerException exc) {
 
         }
+        writeDataToFile();
         label.setText(nodeName + "更改数据为:" + (String) node.getUserObject());
     }
 
     @Override
     public void treeNodesInserted(TreeModelEvent e) {
-
+        writeDataToFile();
     }
 
     @Override
     public void treeNodesRemoved(TreeModelEvent e) {
-
+        writeDataToFile();
     }
+
+    public void writeDataToFile(){
+        TreeNode root1 = (TreeNode)treeModel.getRoot();
+        String json = parseTreeNode(root1);
+        DataUtil.setData(json);
+    }
+
 
     @Override
     public void treeStructureChanged(TreeModelEvent e) {
-
+        writeDataToFile();
     }
 
     class MouseHandle extends MouseAdapter {

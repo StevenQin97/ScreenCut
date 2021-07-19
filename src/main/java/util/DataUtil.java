@@ -2,29 +2,24 @@ package util;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import common.Constant;
 
 import java.io.*;
 
 public class DataUtil {
 
-    public static String getData(){
-        String jsonStr = readJsonFile("/data.json");
+    public static JSONObject getData(){
+        String jsonStr = readJsonFile(Constant.BASE_PATH + "data.json");
+        JSONObject jobj = null;
         if(jsonStr != null){
-            JSONObject jobj = JSON.parseObject(jsonStr);
+            jobj = JSON.parseObject(jsonStr);
         }
-        return null;
+        return jobj;
     }
 
     public static void setData(String data){
-        File file = new File("/data.json");
-        //如果文件存在，则删除后新建一个
+        File file = new File(Constant.BASE_PATH + "data.json");
         writeStringToFile(file,data);
-    }
-
-    public static boolean cleanData(){
-        String data = "";
-        setData(data);
-        return true;
     }
 
     public static String readJsonFile(String fileName) {
@@ -50,14 +45,16 @@ public class DataUtil {
 
     public static void writeStringToFile(File file,String data) {
         //若文件已经存在，则删除后重新写入
-        if(!file.exists()){
+        if(file.exists()){
             file.delete();
         }
         try {
             file.createNewFile();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());;
         }
+
+
         BufferedWriter writer = null;
         //写入
         try {
