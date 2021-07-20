@@ -1,5 +1,6 @@
 package home;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import common.Constant;
 import screencut.ScreenCut;
@@ -14,6 +15,7 @@ import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.lang.reflect.Array;
 
 public class HomePage extends JDialog implements ActionListener, TreeModelListener {
     private JPanel treePanel;
@@ -93,10 +95,28 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
         }
 
         JSONObject data = DataUtil.getData();
-        if(data!=null){
-
+        if(data == null){
+            DefaultMutableTreeNode root = new DefaultMutableTreeNode("功能清单");
+            tree = new JTree(root);
+            return;
         }
 
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode(data.get("name").toString());
+        JSONArray children = data.getJSONArray("children");
+        for(Object child : children){
+            generateTreeNode((JSONObject)child,root);
+        }
+        tree = new JTree(root);
+    }
+
+    private void generateTreeNode(JSONObject data,DefaultMutableTreeNode parent){
+        String name = data.get("name").toString();
+        DefaultMutableTreeNode current = new DefaultMutableTreeNode(name);
+        JSONArray children = data.getJSONArray("children");
+        for(Object child : children){
+            generateTreeNode((JSONObject)child,current);
+        }
+        parent.add(current);
     }
 
     public void initTree(){
