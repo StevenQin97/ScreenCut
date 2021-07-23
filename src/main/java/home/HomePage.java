@@ -32,8 +32,10 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
         frame = new JFrame("功能截图管理工具");
         frame.setSize(1024, 800);
         frame.setResizable(false);
+
         initTree();
         initComponents();
+
         frame.requestFocus();
         frame.setContentPane(panel);
         frame.setLocationRelativeTo(null);
@@ -59,28 +61,26 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
     }
 
     public void initComponents() {
-        JButton btnDelPic = new JButton("删除截图");
-        JButton btnNewPic = new JButton("添加截图");
+
         JPanel buttonPanel = new JPanel();
 
+        JButton btnDelPic = new JButton("删除截图");
         buttonPanel.add(btnDelPic);
         btnDelPic.setActionCommand("delPic");
         btnDelPic.addActionListener(this);
 
+        JButton btnNewPic = new JButton("添加截图");
         buttonPanel.add(btnNewPic);
         btnNewPic.setActionCommand("newPic");
         btnNewPic.addActionListener(this);
 
         imgLabel = new JLabel();
         showPic("");
-
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setViewportView(imgLabel);
-        scrollPane.setBackground(Color.white);
 
         imgPanel.add(buttonPanel, BorderLayout.NORTH);
         imgPanel.add(scrollPane, BorderLayout.CENTER);
-        imgPanel.add(new JLabel("  "), BorderLayout.SOUTH);
 
     }
 
@@ -95,38 +95,6 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
             icon.setImage(icon.getImage().getScaledInstance(685, 500, Image.SCALE_DEFAULT));
             imgLabel.setIcon(icon);
         }
-    }
-
-    /**
-     * @Description 获取json数据信息并构建树
-     * @Date 11:37 2021/7/21
-     **/
-    public void getTreeData() {
-        File dir = new File(Constant.BASE_PATH);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-
-        File file = new File(Constant.BASE_PATH + "data.json");
-        if (!file.exists()) {
-            DefaultMutableTreeNode root = new DefaultMutableTreeNode("功能清单");
-            tree = new JTree(root);
-            return;
-        }
-
-        JSONObject data = DataUtil.getData();
-        if (data == null) {
-            DefaultMutableTreeNode root = new DefaultMutableTreeNode("功能清单");
-            tree = new JTree(root);
-            return;
-        }
-
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode(data.get("name").toString());
-        JSONArray children = data.getJSONArray("children");
-        for (Object child : children) {
-            generateTreeNode((JSONObject) child, root);
-        }
-        tree = new JTree(root);
     }
 
     /**
@@ -270,6 +238,40 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
             }
         });
     }
+
+    /**
+     * @Description 获取json数据信息并构建树
+     * @Date 11:37 2021/7/21
+     **/
+    public void getTreeData() {
+        File dir = new File(Constant.BASE_PATH);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        File file = new File(Constant.BASE_PATH + "data.json");
+        if (!file.exists()) {
+            DefaultMutableTreeNode root = new DefaultMutableTreeNode("功能清单");
+            tree = new JTree(root);
+            return;
+        }
+
+        JSONObject data = DataUtil.getData();
+        if (data == null) {
+            DefaultMutableTreeNode root = new DefaultMutableTreeNode("功能清单");
+            tree = new JTree(root);
+            return;
+        }
+
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode(data);
+        JSONArray children = data.getJSONArray("children");
+        for (Object child : children) {
+            generateTreeNode((JSONObject) child, root);
+        }
+        tree = new JTree(root);
+    }
+
+
 
     /**
      * @Description 功能树存为Json
