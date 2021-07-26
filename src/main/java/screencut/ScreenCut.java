@@ -1,11 +1,13 @@
 package screencut;
 
 import common.Constant;
+import home.CustomTreeNode;
 import home.HomePage;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
+import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Rectangle2D;
@@ -81,9 +83,9 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
     private Cursor cur;
     private static File file;
     /**
-     * 截图存储路径
+     * 当前关联节点
      */
-    private String filePath;
+    DefaultMutableTreeNode node;
 
 
     /**
@@ -132,10 +134,10 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
     private HomePage parentPage;
 
     public static void main(String[] args) {
-        ShowScreenCut(null,"");
+        ShowScreenCut(null,null);
     }
 
-    public static void ShowScreenCut(HomePage parent,String filePath) {
+    public static void ShowScreenCut(HomePage parent, DefaultMutableTreeNode node) {
         try {
             UIManager.setLookAndFeel(new NimbusLookAndFeel());
         } catch (Exception ex) {
@@ -146,7 +148,7 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                ScreenCut dialog = new ScreenCut(new JFrame(), parent, filePath);
+                ScreenCut dialog = new ScreenCut(new JFrame(), parent, node);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
@@ -158,7 +160,7 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
         });
     }
 
-    public ScreenCut(java.awt.Frame parent, HomePage parentPage,String filePath) {
+    public ScreenCut(java.awt.Frame parent, HomePage parentPage,DefaultMutableTreeNode node) {
         parent.setResizable(false);
         initComponents();
         addMouseListener(this);
@@ -167,7 +169,7 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
         panel.setVisible(false);
         if(parentPage!= null){
             this.parentPage = parentPage;
-            this.filePath = filePath;
+            this.node = node;
         }
         try {
             robot = new Robot();
@@ -369,19 +371,18 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
             if ("exit".equals(cmd)) {
                 dispose();
                 if(parentPage!= null){
-                    parentPage.actionForPicChange(filePath);
+                    parentPage.actionForPicChange(node);
                 }
             } else if ("save".equals(cmd)) {
-                File imgDir ;
-                if(filePath.lastIndexOf('/') == -1){
-                    imgDir = new File(Constant.IMG_PATH);
-                }else{
-                    imgDir = new File(Constant.IMG_PATH + filePath.substring(0,filePath.lastIndexOf('/')));
-                }
+                File imgDir = new File(Constant.IMG_PATH);
                 if(!imgDir.exists()){
                     imgDir.mkdirs();
                 }
-                ScreenCut.file = new File(Constant.IMG_PATH+ filePath +Constant.IMG_TYPE);
+                CustomTreeNode userObject = (CustomTreeNode) node.getUserObject();
+                if(userObject.getImgName() == null || !"".equals(userObject.getImgName()) ){
+                    userObject.setImgName(System.currentTimeMillis()+"");
+                }
+                ScreenCut.file = new File(Constant.IMG_PATH + userObject.getImgName() + Constant.IMG_TYPE);
                 if (ScreenCut.file.exists()) {
                     int opt = JOptionPane.showConfirmDialog(rootPane, "文件" + ScreenCut.file.getName() + "已经存在,是否覆盖？");
                     if (opt == JOptionPane.OK_OPTION) {
@@ -422,7 +423,7 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
                     Logger.getLogger(ScreenCut.class.getName()).log(Level.SEVERE, null, ex);
                 } finally {
                     if(parentPage!= null){
-                        parentPage.actionForPicChange(filePath);
+                        parentPage.actionForPicChange(node);
                     }
                     dispose();
                 }
