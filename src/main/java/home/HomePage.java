@@ -232,9 +232,14 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
                 }
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     TreePath pathForLocation = tree.getPathForLocation(x, y);
+
+                    Object selectNode = tree.getLastSelectedPathComponent();
+                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) selectNode;
+                    CustomTreeNode userObject = (CustomTreeNode) node.getUserObject();
+                    String path = Constant.IMG_PATH + userObject.getImgName() + Constant.IMG_TYPE;
                     if (pathForLocation != null) {
                         tree.setSelectionPath(pathForLocation);
-                        showPic(getFilePath(pathForLocation));
+                        showPic(path);
                     }
                     if (menu.isVisible()) {
                         menu.setVisible(false);

@@ -379,7 +379,7 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
                     imgDir.mkdirs();
                 }
                 CustomTreeNode userObject = (CustomTreeNode) node.getUserObject();
-                if(userObject.getImgName() == null || !"".equals(userObject.getImgName()) ){
+                if(userObject.getImgName() == null || "".equals(userObject.getImgName()) ){
                     userObject.setImgName(System.currentTimeMillis()+"");
                 }
                 ScreenCut.file = new File(Constant.IMG_PATH + userObject.getImgName() + Constant.IMG_TYPE);
