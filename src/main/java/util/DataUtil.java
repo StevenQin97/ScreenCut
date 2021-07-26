@@ -11,8 +11,12 @@ public class DataUtil {
     public static JSONObject getData(){
         String jsonStr = readJsonFile(Constant.BASE_PATH + "data.json");
         JSONObject jobj = null;
-        if(jsonStr != null){
-            jobj = JSON.parseObject(jsonStr);
+        if(jsonStr != null && !"".equals(jsonStr)){
+            try{
+                jobj = JSON.parseObject(jsonStr);
+            }catch (Exception e){
+                System.out.println("json结构转换失败");
+            }
         }
         return jobj;
     }

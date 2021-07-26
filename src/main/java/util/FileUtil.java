@@ -3,6 +3,10 @@ package util;
 import java.io.File;
 
 public class FileUtil {
+    /**
+     * @Description 删除文件目录
+     * @Date 9:31 2021/7/26
+     **/
     public static void deleteFileDir(File file) {
         //判断文件不为null或文件目录存在
         if (file == null || !file.exists()) {
