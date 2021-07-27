@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import common.Constant;
 import screencut.ScreenCut;
 import util.DataUtil;
+import util.FileExport;
 import util.FileUtil;
 
 import javax.swing.*;
@@ -16,8 +17,6 @@ import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
-import java.util.Date;
-import java.util.Map;
 
 public class HomePage extends JDialog implements ActionListener, TreeModelListener {
     private JPanel treePanel;
@@ -26,8 +25,7 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
     private JFrame frame;
     private JLabel imgLabel;
     private JTree tree;
-    private String nodeName = null;
-    JLabel label = null;
+    JFileChooser jfc = new JFileChooser();
     DefaultTreeModel treeModel = null;
     CustomTreeNode defaultRoot = new CustomTreeNode(System.currentTimeMillis(), "功能清单");
 
@@ -91,9 +89,9 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
      * @Description 设置展示截图的label的背景图片
      * @Date 11:53 2021/7/21
      **/
-    private void showPic(String filepath) {
-        if (filepath != null) {
-            String path = Constant.IMG_PATH + filepath + Constant.IMG_TYPE;
+    private void showPic(String imgName) {
+        if (imgName != null) {
+            String path = Constant.IMG_PATH + imgName + Constant.IMG_TYPE;
             ImageIcon icon = new ImageIcon(path);
             icon.setImage(icon.getImage().getScaledInstance(685, 500, Image.SCALE_DEFAULT));
             imgLabel.setIcon(icon);
@@ -126,7 +124,6 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
     public void initTree() {
         getTreeData();
         tree.setEditable(true);
-        tree.addMouseListener(new MouseHandle());
         treeModel = (DefaultTreeModel) tree.getModel();
         treeModel.addTreeModelListener(this);
 
@@ -143,10 +140,8 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
         buttonExport.setActionCommand("export");
         buttonExport.addActionListener(this);
         panel.add(buttonExport);
-        label = new JLabel("Action");
         treePanel.add(panel, BorderLayout.NORTH);
         treePanel.add(scrollPane, BorderLayout.CENTER);
-        treePanel.add(label, BorderLayout.SOUTH);
         treePanel.setPreferredSize(new Dimension(300, -1));
         //右键菜单
         JPopupMenu menu = new JPopupMenu();
@@ -174,7 +169,6 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
                 // tree的scrollPathToVisible()方法在使Tree会自动展开文件夹以便显示所加入的新节点。若没加这行则加入的新节点
                 // 会被 包在文件夹中，你必须自行展开文件夹才看得到。
                 tree.scrollPathToVisible(new TreePath(newNode.getPath()));
-                label.setText("新增节点成功");
             }
         });
 
@@ -208,7 +202,6 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
                             }
 
                             treeModel.removeNodeFromParent(selectionNode);
-                            label.setText("删除节点成功");
                         }
                     }
                 }
@@ -233,14 +226,14 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     TreePath pathForLocation = tree.getPathForLocation(x, y);
 
-                    Object selectNode = tree.getLastSelectedPathComponent();
-                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) selectNode;
-                    CustomTreeNode userObject = (CustomTreeNode) node.getUserObject();
-                    String path = Constant.IMG_PATH + userObject.getImgName() + Constant.IMG_TYPE;
                     if (pathForLocation != null) {
                         tree.setSelectionPath(pathForLocation);
-                        showPic(path);
+                        Object selectNode = tree.getLastSelectedPathComponent();
+                        DefaultMutableTreeNode node = (DefaultMutableTreeNode) selectNode;
+                        CustomTreeNode userObject = (CustomTreeNode) node.getUserObject();
+                        showPic(userObject.getImgName());
                     }
+
                     if (menu.isVisible()) {
                         menu.setVisible(false);
                     }
@@ -314,7 +307,7 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
     @Override
     public void actionPerformed(ActionEvent ae) {
         if ("export".equals(ae.getActionCommand())) {
-            label.setText("export");
+            new FileExport();
         }
         if ("clean".equals(ae.getActionCommand())) {
             // 下面一行，由DefaultTreeModel的getRoot()方法取得根节点.
@@ -322,34 +315,17 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
             if (opt == JOptionPane.OK_OPTION) {
                 DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode) treeModel.getRoot();
                 // 下面一行删除所有子节点.
-                TreeNode[] path = rootNode.getPath();
-                StringBuffer pathStr = new StringBuffer(Constant.IMG_PATH);
-                for (int i = 0; i < path.length - 1; i++) {
-                    pathStr.append(path[i]);
-                    pathStr.append("/");
-                }
-                pathStr.append(path[path.length - 1]);
-                if (rootNode.isLeaf()) {
-                    pathStr.append(Constant.IMG_TYPE);
-                    File file = new File(pathStr.toString());
-                    file.delete();
-                } else {
-                    File file = new File(pathStr.toString());
-                    FileUtil.deleteFileDir(file);
-                }
-
+                File imgDir = new File(Constant.IMG_PATH);
+                FileUtil.deleteFileDir(imgDir);
                 rootNode.removeAllChildren();
                 // 删除完后务必运行DefaultTreeModel的reload()操作，整个Tree的节点才会真正被删除.
                 treeModel.reload();
-                label.setText("清除所有节点成功");
             }
         }
         if ("newPic".equals(ae.getActionCommand())) {
             frame.setExtendedState(Frame.ICONIFIED);
-
             Object selectNode = tree.getLastSelectedPathComponent();
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) selectNode;
-
             ScreenCut.ShowScreenCut(this, node);
         }
         if ("delPic".equals(ae.getActionCommand())) {
@@ -362,6 +338,7 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
                 if (file.exists()) {
                     file.delete();
                 }
+                userObject.setImgName("");
                 showPic("");
                 frame.repaint();
             }
@@ -375,21 +352,14 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
      **/
     public void actionForPicChange(DefaultMutableTreeNode node) {
         CustomTreeNode userObject = (CustomTreeNode) node.getUserObject();
+        writeDataToFile();
         showPic(userObject.getImgName());
         frame.setExtendedState(Frame.NORMAL);
     }
 
     @Override
     public void treeNodesChanged(TreeModelEvent e) {
-//        TreePath treePath = e.getTreePath();
-//        DefaultMutableTreeNode node = (DefaultMutableTreeNode) treePath.getLastPathComponent();
-//        try {
-//            int[] index = e.getChildIndices();
-//            node = (DefaultMutableTreeNode) node.getChildAt(index[0]);
-//        } catch (NullPointerException exc) {
-//
-//        }
-//        label.setText(nodeName + "更改数据为:" + node.getUserObject().toString());
+        writeDataToFile();
     }
 
     @Override
@@ -418,19 +388,6 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
         writeDataToFile();
     }
 
-    class MouseHandle extends MouseAdapter {
-        @Override
-        public void mousePressed(MouseEvent e) {
-            try {
-                JTree tree = (JTree) e.getSource();
-                int rowLocation = tree.getRowForLocation(e.getX(), e.getY());
-                TreePath treepath = tree.getPathForRow(rowLocation);
-                TreeNode treenode = (TreeNode) treepath.getLastPathComponent();
-                nodeName = treenode.toString();
-            } catch (NullPointerException ne) {
-            }
-        }
-    }
 
     class TreeCellEditorAction implements CellEditorListener {
         @Override
@@ -453,17 +410,6 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
         public void editingCanceled(ChangeEvent e) {
             editingStopped(e);
         }
-    }
-
-    /**
-     * @Description 根据树路径的到文件路径的字符串
-     * @Date 10:18 2021/7/21
-     **/
-    private String getFilePath(TreePath treePath) {
-        String s = treePath.toString();
-        String substring = s.substring(1, s.length() - 1);
-        String s1 = substring.replaceAll(", ", "/");
-        return s1;
     }
 
 }
