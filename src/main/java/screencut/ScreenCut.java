@@ -87,7 +87,6 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
      */
     DefaultMutableTreeNode node;
 
-
     /**
      * 画方形的粗细
      */
@@ -107,8 +106,6 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
     private final int RIGHT_UP = 7;
     private final int LEFT_DOWN = 6;
     private final int RIGHT_DOWN = 8;
-
-
 
     private JPanel panel;
     private JToolBar toolbar;
@@ -369,10 +366,10 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
             displaySelected.setBackground(jb.getBackground());
         } else {
             if ("exit".equals(cmd)) {
-                dispose();
                 if(parentPage!= null){
                     parentPage.actionForPicChange(node);
                 }
+                dispose();
             } else if ("save".equals(cmd)) {
                 File imgDir = new File(Constant.IMG_PATH);
                 if(!imgDir.exists()){
@@ -744,6 +741,7 @@ public class ScreenCut extends JDialog implements MouseListener, MouseMotionList
             }
             toolbar.setVisible(isShow);
             panel.setVisible(isShow && isSelection());
+            panel1.setVisible(isSelection());
         }
         if (isDrawing) {
             if (rectbtn.isSelected()) {

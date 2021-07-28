@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import common.Constant;
 import screencut.ScreenCut;
 import util.DataUtil;
-import util.FileExport;
+import export.FileExport;
 import util.FileUtil;
 
 import javax.swing.*;
@@ -25,7 +25,12 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
     private JFrame frame;
     private JLabel imgLabel;
     private JTree tree;
-    JFileChooser jfc = new JFileChooser();
+
+    private JButton buttonClean;
+    private JButton buttonExport;
+    private JButton btnDelPic;
+    private JButton btnNewPic;
+
     DefaultTreeModel treeModel = null;
     CustomTreeNode defaultRoot = new CustomTreeNode(System.currentTimeMillis(), "功能清单");
 
@@ -65,14 +70,12 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
 
         JPanel buttonPanel = new JPanel();
 
-        JButton btnDelPic = new JButton("删除截图");
+        btnDelPic = new JButton("删除截图");
         buttonPanel.add(btnDelPic);
-        btnDelPic.setActionCommand("delPic");
         btnDelPic.addActionListener(this);
 
-        JButton btnNewPic = new JButton("添加截图");
+        btnNewPic = new JButton("添加截图");
         buttonPanel.add(btnNewPic);
-        btnNewPic.setActionCommand("newPic");
         btnNewPic.addActionListener(this);
 
         imgLabel = new JLabel();
@@ -131,13 +134,11 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setViewportView(tree);
         JPanel panel = new JPanel();
-        JButton buttonClean = new JButton("清除所有节点");
-        buttonClean.setActionCommand("clean");
+        buttonClean = new JButton("清除所有节点");
         buttonClean.addActionListener(this);
         panel.add(buttonClean);
 
-        JButton buttonExport = new JButton("导出文件");
-        buttonExport.setActionCommand("export");
+        buttonExport = new JButton("导出文件");
         buttonExport.addActionListener(this);
         panel.add(buttonExport);
         treePanel.add(panel, BorderLayout.NORTH);
@@ -185,22 +186,14 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
                         TreeNode parent = (TreeNode) selectionNode.getParent();
                         if (parent != null) {
                             // 由DefaultTreeModel的removeNodeFromParent()方法删除节点，包含它的子节点。
-                            TreeNode[] path = selectionNode.getPath();
-                            StringBuffer pathStr = new StringBuffer(Constant.IMG_PATH);
-                            for (int i = 0; i < path.length - 1; i++) {
-                                pathStr.append(path[i]);
-                                pathStr.append("/");
+                            java.util.List<String> imgNameList = new java.util.ArrayList<String>();
+                            getImgNameList(selectionNode,imgNameList);
+                            for(String imgName : imgNameList){
+                                File file = new File (Constant.IMG_PATH + imgName + Constant.IMG_TYPE);
+                                if(file.exists()){
+                                    file.delete();
+                                }
                             }
-                            pathStr.append(path[path.length - 1]);
-                            if (selectionNode.isLeaf()) {
-                                pathStr.append(Constant.IMG_TYPE);
-                                File file = new File(pathStr.toString());
-                                file.delete();
-                            } else {
-                                File file = new File(pathStr.toString());
-                                FileUtil.deleteFileDir(file);
-                            }
-
                             treeModel.removeNodeFromParent(selectionNode);
                         }
                     }
@@ -240,6 +233,14 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
                 }
             }
         });
+    }
+
+    public void getImgNameList(DefaultMutableTreeNode selectionNode,java.util.List imgNameList){
+        CustomTreeNode userObject = (CustomTreeNode) selectionNode.getUserObject();
+        imgNameList.add(userObject.getImgName());
+        for(int i = 0;i<selectionNode.getChildCount();i++){
+            getImgNameList((DefaultMutableTreeNode)selectionNode.getChildAt(i),imgNameList);
+        }
     }
 
     /**
@@ -306,10 +307,10 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
 
     @Override
     public void actionPerformed(ActionEvent ae) {
-        if ("export".equals(ae.getActionCommand())) {
+        if (buttonExport.equals(ae.getSource())) {
             new FileExport();
         }
-        if ("clean".equals(ae.getActionCommand())) {
+        if (buttonClean.equals(ae.getSource())) {
             // 下面一行，由DefaultTreeModel的getRoot()方法取得根节点.
             int opt = JOptionPane.showConfirmDialog(rootPane, "清除所有节点及截图？");
             if (opt == JOptionPane.OK_OPTION) {
@@ -322,25 +323,34 @@ public class HomePage extends JDialog implements ActionListener, TreeModelListen
                 treeModel.reload();
             }
         }
-        if ("newPic".equals(ae.getActionCommand())) {
-            frame.setExtendedState(Frame.ICONIFIED);
+        if (btnNewPic.equals(ae.getSource())) {
             Object selectNode = tree.getLastSelectedPathComponent();
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) selectNode;
-            ScreenCut.ShowScreenCut(this, node);
-        }
-        if ("delPic".equals(ae.getActionCommand())) {
-            int opt = JOptionPane.showConfirmDialog(rootPane, "是否删除当前截图？");
-            if (opt == JOptionPane.OK_OPTION) {
-                Object selectNode = tree.getLastSelectedPathComponent();
+            if(selectNode != null){
+                frame.setExtendedState(Frame.ICONIFIED);
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) selectNode;
-                CustomTreeNode userObject = (CustomTreeNode) node.getUserObject();
-                File file = new File(Constant.IMG_PATH + userObject.getImgName() + Constant.IMG_TYPE);
-                if (file.exists()) {
-                    file.delete();
+                ScreenCut.ShowScreenCut(this, node);
+            }else{
+                JOptionPane.showMessageDialog(null, "请先选择功能点", "提示",JOptionPane.INFORMATION_MESSAGE);
+            }
+
+        }
+        if (btnDelPic.equals(ae.getSource())) {
+            Object selectNode = tree.getLastSelectedPathComponent();
+            if(selectNode != null){
+                int opt = JOptionPane.showConfirmDialog(rootPane, "是否删除当前截图？");
+                if (opt == JOptionPane.OK_OPTION) {
+                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) selectNode;
+                    CustomTreeNode userObject = (CustomTreeNode) node.getUserObject();
+                    File file = new File(Constant.IMG_PATH + userObject.getImgName() + Constant.IMG_TYPE);
+                    if (file.exists()) {
+                        file.delete();
+                    }
+                    userObject.setImgName("");
+                    showPic("");
+                    frame.repaint();
                 }
-                userObject.setImgName("");
-                showPic("");
-                frame.repaint();
+            }else{
+                JOptionPane.showMessageDialog(null, "请先选择功能点", "提示",JOptionPane.INFORMATION_MESSAGE);
             }
         }
 
